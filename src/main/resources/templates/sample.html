@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Ticket Management</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Ticket Management</h1>
+
+        <!-- Tabs Navigation -->
+        <ul class="nav nav-tabs" id="ticketTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab" aria-controls="create" aria-selected="true">Create Ticket</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="list-tab" data-bs-toggle="tab" data-bs-target="#list" type="button" role="tab" aria-controls="list" aria-selected="false">List All Tickets</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="get-tab" data-bs-toggle="tab" data-bs-target="#get" type="button" role="tab" aria-controls="get" aria-selected="false">Get Ticket by ID</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="delete-tab" data-bs-toggle="tab" data-bs-target="#delete" type="button" role="tab" aria-controls="delete" aria-selected="false">Delete Ticket by ID</button>
+            </li>
+        </ul>
+
+        <!-- Tabs Content -->
+        <div class="tab-content mt-4" id="ticketTabsContent">
+            <!-- Create Ticket Tab -->
+            <div class="tab-pane fade show active" id="create" role="tabpanel" aria-labelledby="create-tab">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h2>Create Ticket</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="/create" th:action="@{/create}" th:object="${ticket}" enctype="application/json">
+                            <div class="mb-3">
+                                <label for="passengerName" class="form-label">Passenger Name:</label>
+                                <input type="text" id="passengerName" name="passengerName" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email:</label>
+                                <input type="email" id="email" name="email" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="SourceStation" class="form-label">Source Station:</label>
+                                <input type="text" id="SourceStation" name="SourceStation" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="DestinationStation" class="form-label">Destination Station:</label>
+                                <input type="text" id="DestinationStation" name="DestinationStation" class="form-control" required>
+                            </div>
+                            <button type="submit" class="btn btn-success">Create Ticket</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List All Tickets Tab -->
+            <div class="tab-pane fade" id="list" role="tabpanel" aria-labelledby="list-tab">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h2>List All Tickets</h2>
+                    </div>
+                    <div class="card-body text-center">
+                        <button class="btn btn-info" onclick="window.location.href='/listall';">View All Tickets</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Get Ticket by ID Tab -->
+            <div class="tab-pane fade" id="get" role="tabpanel" aria-labelledby="get-tab">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h2>Get Ticket by ID</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" action="/get/{ticketId}" th:action="@{/get/{ticketId}(ticketId=${ticketId})}">
+                            <div class="mb-3">
+                                <label for="ticketId" class="form-label">Ticket ID:</label>
+                                <input type="number" id="ticketId" name="ticketId" class="form-control" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Get Ticket</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete Ticket by ID Tab -->
+            <div class="tab-pane fade" id="delete" role="tabpanel" aria-labelledby="delete-tab">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h2>Delete Ticket by ID</h2>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="/delete/{ticketId}" th:action="@{/delete/{ticketId}(ticketId=${ticketId})}">
+                            <div class="mb-3">
+                                <label for="deleteTicketId" class="form-label">Ticket ID:</label>
+                                <input type="number" id="deleteTicketId" name="ticketId" class="form-control" required>
+                            </div>
+                            <button type="submit" class="btn btn-danger">Delete Ticket</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
