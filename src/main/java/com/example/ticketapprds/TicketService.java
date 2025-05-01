@@ -19,7 +19,7 @@ public class TicketService {
     }
 
     public Ticket getTicket(Integer ticketId) {
-        return ticketdao.findById(ticketId).orElse(new Ticket());
+        return ticketdao.findById(ticketId).orElse(null);
     }
 
     public void deleteTicket(Integer ticketId) {
