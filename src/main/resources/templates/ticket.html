@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Ticket Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Ticket Management</h1>
+
+    <!-- Success or Error Message -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs" id="ticketTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="create-tab" data-bs-toggle="tab" data-bs-target="#create" type="button" role="tab" aria-controls="create" aria-selected="true">Create Ticket</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="list-tab" data-bs-toggle="tab" data-bs-target="#list" type="button" role="tab" aria-controls="list" aria-selected="false">List All Tickets</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="get-tab" data-bs-toggle="tab" data-bs-target="#get" type="button" role="tab" aria-controls="get" aria-selected="false">Get Ticket by ID</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="delete-tab" data-bs-toggle="tab" data-bs-target="#delete" type="button" role="tab" aria-controls="delete" aria-selected="false">Delete Ticket by ID</button>
+        </li>
+    </ul>
+
+    <!-- Tabs Content -->
+    <div class="tab-content mt-4" id="ticketTabsContent">
+        <!-- Create Ticket Tab -->
+        <div class="tab-pane fade show active" id="create" role="tabpanel" aria-labelledby="create-tab">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2>Create Ticket</h2>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/create}" th:object="${ticket}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Passenger Name:</label>
+                            <input type="text" class="form-control" th:field="*{passengerName}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email:</label>
+                            <input type="email" class="form-control" th:field="*{email}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Source Station:</label>
+                            <input type="text" class="form-control" th:field="*{sourceStation}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Destination Station:</label>
+                            <input type="text" class="form-control" th:field="*{destinationStation}" required>
+                        </div>
+                        <button type="submit" class="btn btn-success">Create Ticket</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- List All Tickets Tab -->
+        <div class="tab-pane fade" id="list" role="tabpanel" aria-labelledby="list-tab">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h2>All Tickets</h2>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/listall}" method="get">
+                        <button type="submit" class="btn btn-info mb-3">Refresh Tickets</button>
+                    </form>
+
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Ticket ID</th>
+                                <th>Passenger Name</th>
+                                <th>Email</th>
+                                <th>Source Station</th>
+                                <th>Destination Station</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="ticket : ${tickets}">
+                                <td th:text="${ticket.ticketId}"></td>
+                                <td th:text="${ticket.passengerName}"></td>
+                                <td th:text="${ticket.email}"></td>
+                                <td th:text="${ticket.sourceStation}"></td>
+                                <td th:text="${ticket.destinationStation}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Get Ticket by ID Tab -->
+        <div class="tab-pane fade" id="get" role="tabpanel" aria-labelledby="get-tab">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h2>Get Ticket by ID</h2>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/get}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Ticket ID:</label>
+                            <input type="number" class="form-control" name="ticketId" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Get Ticket</button>
+                    </form>
+
+                    <div th:if="${foundTicket}" class="mt-4">
+                        <h4>Ticket Details:</h4>
+                        <p><strong>ID:</strong> <span th:text="${foundTicket.ticketId}"></span></p>
+                        <p><strong>Passenger Name:</strong> <span th:text="${foundTicket.passengerName}"></span></p>
+                        <p><strong>Email:</strong> <span th:text="${foundTicket.email}"></span></p>
+                        <p><strong>Source:</strong> <span th:text="${foundTicket.sourceStation}"></span></p>
+                        <p><strong>Destination:</strong> <span th:text="${foundTicket.destinationStation}"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Ticket by ID Tab -->
+        <div class="tab-pane fade" id="delete" role="tabpanel" aria-labelledby="delete-tab">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h2>Delete Ticket by ID</h2>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/delete}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Ticket ID:</label>
+                            <input type="number" class="form-control" name="ticketId" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Delete Ticket</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
