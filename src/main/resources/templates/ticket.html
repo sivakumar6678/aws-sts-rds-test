@@ -27,9 +27,19 @@
         <h1 class="mb-0">Ticket Management</h1>
         <div>
             <span class="me-3">Welcome, <span th:text="${username}">User</span>!</span>
-            <form th:action="@{/logout}" method="post" class="d-inline">
-                <button type="submit" class="btn btn-outline-danger">Logout</button>
+            <form id="logoutForm" th:action="@{/logout}" method="post" class="d-inline">
+                <button type="button" onclick="logout()" class="btn btn-outline-danger">Logout</button>
             </form>
+            <script>
+                function logout() {
+                    document.getElementById('logoutForm').submit();
+                    // Force redirect to login page after a short delay
+                    setTimeout(function() {
+                        window.location.href = '/login?logout';
+                    }, 100);
+                    return false;
+                }
+            </script>
         </div>
     </div>
 

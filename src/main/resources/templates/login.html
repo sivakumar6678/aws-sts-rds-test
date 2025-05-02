@@ -81,8 +81,8 @@
         <h2>Login</h2>
         
         <!-- Success message -->
-        <div th:if="${param.registered} or ${successMessage}" class="alert alert-success">
-            <span th:text="${successMessage ?: 'Registration successful! Please log in.'}"></span>
+        <div th:if="${param.registered} or ${param.logout} or ${successMessage}" class="alert alert-success">
+            <span th:text="${successMessage ?: (param.logout ? 'You have been logged out successfully' : 'Registration successful! Please log in.')}"></span>
         </div>
         
         <!-- Error message -->
