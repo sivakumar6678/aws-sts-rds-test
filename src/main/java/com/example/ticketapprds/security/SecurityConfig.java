@@ -7,9 +7,21 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -21,32 +33,58 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
+    // Debug filter to log authentication details
+    private class AuthenticationDebugFilter extends OncePerRequestFilter {
+        @Override
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+                throws ServletException, IOException {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            System.out.println("DEBUG - Request URI: " + request.getRequestURI());
+            System.out.println("DEBUG - Authentication: " + (auth != null ? auth.getName() : "null"));
+            System.out.println("DEBUG - Is authenticated: " + (auth != null && auth.isAuthenticated()));
+            if (auth != null) {
+                System.out.println("DEBUG - Authorities: " + auth.getAuthorities());
+            }
+            filterChain.doFilter(request, response);
+        }
+    }
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, SecurityContextRepository securityContextRepository) throws Exception {
         http
+            // Completely disable CSRF protection for simplicity
+            .csrf(csrf -> csrf.disable())
+            
+            // Use the session security context repository
+            .securityContext(securityContext -> securityContext
+                .securityContextRepository(securityContextRepository)
+            )
+            
+            // Configure session management
+            .sessionManagement(session -> session
+                .maximumSessions(1)
+            )
+            
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/", "/home", "/register", "/login", "/css/**", "/js/**", "/images/**").permitAll()
-                .requestMatchers("/tickets/**", "/api/tickets/**").hasRole("USER")
+                .requestMatchers("/login", "/", "/register", "/verify-otp", "/css/**", "/js/**", "/images/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/**")
-            )
             .formLogin(form -> form
-                .loginPage("/login")
-                .defaultSuccessUrl("/tickets")
-                .permitAll()
+                .disable() // Disable Spring Security's form login to use our custom authentication
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    response.sendRedirect("/login?logout");
-                })
+                .logoutSuccessUrl("/login?logout")
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
                 .deleteCookies("JSESSIONID")
                 .permitAll()
-            );
+            )
+            .exceptionHandling(exceptions -> exceptions
+                .accessDeniedPage("/login") // Redirect to login page on access denied
+            )
+            // Add debug filter
+            .addFilterBefore(new AuthenticationDebugFilter(), AnonymousAuthenticationFilter.class);
         
         return http.build();
     }
@@ -67,5 +105,10 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+    
+    @Bean
+    public SecurityContextRepository securityContextRepository() {
+        return new HttpSessionSecurityContextRepository();
     }
 }

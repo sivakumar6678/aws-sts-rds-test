@@ -23,8 +23,8 @@ public class TicketController {
             return "redirect:/tickets";
         }
         
-        // Otherwise show welcome page
-        return "first";
+        // Otherwise redirect to login page
+        return "redirect:/login";
     }
     
     // Tickets main page (protected)
@@ -35,9 +35,23 @@ public class TicketController {
             model.addAttribute("activeTab", activeTab);
         }
         
-        // Get current logged in username
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        model.addAttribute("username", auth.getName());
+        try {
+            // Get current logged in username
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            System.out.println("Tickets page - Authentication: " + (auth != null ? auth.getName() : "null"));
+            System.out.println("Tickets page - Is authenticated: " + (auth != null && auth.isAuthenticated()));
+            
+            if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
+                model.addAttribute("username", auth.getName());
+            } else {
+                model.addAttribute("username", "Guest");
+                System.out.println("Warning: User not properly authenticated when accessing tickets page");
+            }
+        } catch (Exception e) {
+            System.out.println("Error getting authentication in tickets page: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("username", "Guest");
+        }
         
         return "ticket"; // return to ticket.html
     }
